@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, ArrowRight, Loader2, Sparkles, Upload, Search, Leaf, Shield, FlaskConical, Stethoscope, Mail, MapPin, Phone, X, Menu, BookOpen, MessageSquare } from "lucide-react";
+import { Camera, ArrowRight, Loader2, Sparkles, Upload, Search, Leaf, Shield, FlaskConical, Stethoscope, Mail, MapPin, Phone, X, Menu, BookOpen, MessageSquare, Download } from "lucide-react";
 import { useLanguage } from "./LanguageContext";
 import { featuredPlants } from "./data/plantsList";
 import { translations } from "./i18n";
