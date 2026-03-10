@@ -188,22 +188,22 @@ function ResultsContent() {
 
     // Plant Profile Raw string
     const plantProfileArr = r(data, 'plant_profile', 'plantProfile');
-    const plantProfile = typeof plantProfileArr === 'object' ? Object.values(plantProfileArr).join(' ') : plantProfileArr || "";
+    const plantProfile = (typeof plantProfileArr === 'object' && plantProfileArr !== null) ? Object.values(plantProfileArr).join(' ') : plantProfileArr || "";
 
     // Preparation Methods
     let prepMethods = "";
-    if (usage.preparation_methods) {
+    if (usage.preparation_methods && typeof usage.preparation_methods === 'object') {
         prepMethods = Object.entries(usage.preparation_methods).map(([k,v]) => `${k.replace(/_/g,' ')}: ${v}`);
     } else {
         const prepMethodsRaw = r(data, 'preparation_methods', 'preparationMethods') || "";
-        prepMethods = typeof prepMethodsRaw === 'object' && !Array.isArray(prepMethodsRaw) 
+        prepMethods = (typeof prepMethodsRaw === 'object' && prepMethodsRaw !== null && !Array.isArray(prepMethodsRaw)) 
             ? Object.values(prepMethodsRaw).map(v => v.method || v).filter(Boolean) 
             : prepMethodsRaw;
     }
 
     // Main Uses
     let mainUses = "";
-    if (details.medicinal_uses && typeof details.medicinal_uses === "object") {
+    if (details.medicinal_uses && typeof details.medicinal_uses === "object" && details.medicinal_uses !== null) {
         mainUses = Object.entries(details.medicinal_uses).map(([k,v]) => `${k.replace(/_/g,' ')}: ${v}`);
     } else {
         mainUses = r(data, 'medicinal_uses', 'main_medicinal_uses', 'mainMedicinalUses') || "";
