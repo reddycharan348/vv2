@@ -603,8 +603,8 @@ export default function Home() {
                             {/* PWA Install Prompt Button - only shows on devices that support it */}
                             <button 
                                 id="install-pwa-btn"
-                                className="hero-btn primary mb-4 mt-8"
-                                style={{ display: 'none', width: 'fit-content' }}
+                                className="hero-btn primary mb-4 mt-8 w-full justify-center shadow-glow"
+                                style={{ display: 'none', background: 'linear-gradient(135deg, var(--gold), #ffb236)', color: '#000', fontSize: '1.1rem', fontWeight: 'bold' }}
                                 onClick={() => {
                                     if (window.deferredPrompt) {
                                         window.deferredPrompt.prompt();
@@ -617,10 +617,21 @@ export default function Home() {
                                     }
                                 }}
                             >
-                                <Shield size={18} /> Install App
+                                <Download size={20} className="mr-2" /> Install VedaVision App
                             </button>
                         </div>
                         <div className="contact-form glass-card">
+                            <div className="about-app-info mb-8 pb-6 border-b border-white border-opacity-10">
+                                <h3 className="form-title mb-3 text-xl font-semibold flex items-center gap-2">
+                                    <Shield size={20} className="text-gold" /> Data Authenticity
+                                </h3>
+                                <p className="text-sm opacity-85 leading-relaxed">
+                                    VedaVision combines advanced AI with verified ancient knowledge. All plant data, uses, 
+                                    and remedies are curated from <strong>AYUSH approved</strong> resources, the Ayurvedic Pharmacopoeia of India (API), 
+                                    and cross-referenced with modern botanical studies to ensure safety and authenticity.
+                                </p>
+                            </div>
+
                             <h3 className="form-title mb-6 text-xl font-semibold">{t("sendMessage")}</h3>
                             <input type="text" placeholder={t('yourName')} className="form-input" />
                             <input type="email" placeholder={t('yourEmail')} className="form-input" />
