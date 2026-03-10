@@ -31,6 +31,12 @@ export default function Home() {
     const [selectedLang, setSelectedLang] = useState(null);
     const [activeSection, setActiveSection] = useState("verify");
 
+    // PWA Install State
+    const [installPrompt, setInstallPrompt] = useState(null);
+    const [isInstalled, setIsInstalled] = useState(false);
+    const [isIOS, setIsIOS] = useState(false);
+    const [showInstallGuide, setShowInstallGuide] = useState(false);
+
     const t = (key) => {
         const langData = translations[language] || translations["English"];
         return langData[key] || translations["English"][key] || key;
@@ -65,14 +71,28 @@ export default function Home() {
     }, [isCameraOpen]);
 
     useEffect(() => {
+        // Detect iOS
+        const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        setIsIOS(ios);
+
+        // Detect if already installed as PWA
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+            setIsInstalled(true);
+        }
+
         const handleBeforeInstallPrompt = (e) => {
             e.preventDefault();
-            window.deferredPrompt = e;
-            const installBtn = document.getElementById('install-pwa-btn');
-            if (installBtn) installBtn.style.display = 'flex';
+            setInstallPrompt(e);
         };
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-        return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        const handleAppInstalled = () => setIsInstalled(true);
+        window.addEventListener('appinstalled', handleAppInstalled);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.removeEventListener('appinstalled', handleAppInstalled);
+        };
     }, []);
 
     const startCamera = async () => {
@@ -600,25 +620,75 @@ export default function Home() {
                                 </div>
                             </div>
                             
-                            {/* PWA Install Prompt Button - only shows on devices that support it */}
-                            <button 
-                                id="install-pwa-btn"
-                                className="hero-btn primary mb-4 mt-8 w-full justify-center shadow-glow"
-                                style={{ display: 'none', background: 'linear-gradient(135deg, var(--gold), #ffb236)', color: '#000', fontSize: '1.1rem', fontWeight: 'bold' }}
-                                onClick={() => {
-                                    if (window.deferredPrompt) {
-                                        window.deferredPrompt.prompt();
-                                        window.deferredPrompt.userChoice.then((choiceResult) => {
-                                            if (choiceResult.outcome === 'accepted') {
-                                                console.log('User accepted the A2HS prompt');
-                                            }
-                                            window.deferredPrompt = null;
-                                        });
-                                    }
-                                }}
-                            >
-                                <Download size={20} className="mr-2" /> Install VedaVision App
-                            </button>
+                            {/* ===== PWA INSTALL SECTION ===== */}
+                            <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'linear-gradient(135deg, rgba(212,168,83,0.08), rgba(45,212,168,0.05))', borderRadius: '1rem', border: '1px solid rgba(212,168,83,0.25)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.75rem' }}>
+                                    <Download size={20} style={{ color: 'var(--gold)' }} />
+                                    <h4 style={{ fontWeight: '700', fontSize: '1rem', color: 'var(--gold)' }}>Install VedaVision App</h4>
+                                </div>
+
+                                {isInstalled ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--green)', fontSize: '0.9rem', fontWeight: '600' }}>
+                                        <Shield size={16} /> App already installed on your device!
+                                    </div>
+                                ) : installPrompt ? (
+                                    /* Android / Desktop Chrome — native install prompt */
+                                    <button
+                                        onClick={async () => {
+                                            installPrompt.prompt();
+                                            const { outcome } = await installPrompt.userChoice;
+                                            if (outcome === 'accepted') setIsInstalled(true);
+                                            setInstallPrompt(null);
+                                        }}
+                                        style={{
+                                            width: '100%', padding: '0.85rem 1.5rem',
+                                            background: 'linear-gradient(135deg, var(--gold), #ffb236)',
+                                            color: '#000', fontWeight: '700', fontSize: '1rem',
+                                            borderRadius: '0.75rem', border: 'none', cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                            boxShadow: '0 4px 24px rgba(212,168,83,0.35)'
+                                        }}
+                                    >
+                                        <Download size={18} /> Tap to Install on Your Device
+                                    </button>
+                                ) : isIOS ? (
+                                    /* iOS instructions */
+                                    <div>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                                            To install on iPhone/iPad:
+                                        </p>
+                                        <ol style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingLeft: '1.2rem', lineHeight: 2 }}>
+                                            <li>Open this page in <strong>Safari</strong></li>
+                                            <li>Tap the <strong>Share</strong> button (square with arrow ↑)</li>
+                                            <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                                            <li>Tap <strong>Add</strong> — done! 🎉</li>
+                                        </ol>
+                                    </div>
+                                ) : (
+                                    /* Desktop / other browsers — manual guide */
+                                    <div>
+                                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                                            Install via your browser:
+                                        </p>
+                                        <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', paddingLeft: '1.2rem', lineHeight: 2 }}>
+                                            <li><strong>Chrome:</strong> Click the ⊕ icon in the address bar</li>
+                                            <li><strong>Edge:</strong> Click ⋯ menu → Apps → Install this site as an app</li>
+                                            <li><strong>Android:</strong> Open in Chrome → tap ⋮ → Add to Home Screen</li>
+                                        </ul>
+                                        <button
+                                            onClick={() => setShowInstallGuide(g => !g)}
+                                            style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                                        >
+                                            {showInstallGuide ? 'Hide guide' : 'Need more help?'}
+                                        </button>
+                                        {showInstallGuide && (
+                                            <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-tertiary)', lineHeight: 1.7 }}>
+                                                Share the app URL with friends. When they open it in Chrome or Safari, they can add it to their home screen — no App Store needed!
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="contact-form glass-card">
                             <div className="about-app-info mb-8 pb-6 border-b border-white border-opacity-10">
