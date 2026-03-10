@@ -213,7 +213,15 @@ function ResultsContent() {
     
     // Ayurvedic properties
     const ayurvedicPropsRaw = details.ayurvedic_properties || r(data, 'ayurvedic_properties') || null;
-    const ayurvedicProps = ayurvedicPropsRaw ? Object.entries(ayurvedicPropsRaw).map(([k, v]) => `${k.replace('_', ' ')}: ${Array.isArray(v) ? v.join(', ') : v}`) : null;
+    let rasa = "", guna = "", virya = "", vipaka = "", dosha_effect = "";
+    if (ayurvedicPropsRaw) {
+        rasa = Array.isArray(ayurvedicPropsRaw.rasa) ? ayurvedicPropsRaw.rasa.join(', ') : (ayurvedicPropsRaw.rasa || "");
+        guna = Array.isArray(ayurvedicPropsRaw.guna) ? ayurvedicPropsRaw.guna.join(', ') : (ayurvedicPropsRaw.guna || "");
+        virya = Array.isArray(ayurvedicPropsRaw.virya) ? ayurvedicPropsRaw.virya.join(', ') : (ayurvedicPropsRaw.virya || "");
+        vipaka = Array.isArray(ayurvedicPropsRaw.vipaka) ? ayurvedicPropsRaw.vipaka.join(', ') : (ayurvedicPropsRaw.vipaka || "");
+        dosha_effect = Array.isArray(ayurvedicPropsRaw.dosha_modulation) ? ayurvedicPropsRaw.dosha_modulation.join(', ') : (ayurvedicPropsRaw.dosha_modulation || ayurvedicPropsRaw.dosha_karma || "");
+    }
+    const hasAyurvedicProps = Boolean(rasa || guna || virya || vipaka || dosha_effect);
 
     // Three / Key uses
     const threeUses = summary.key_uses || r(data, 'three_main_uses', 'usesInAyurveda') || (ayurvedicPropsRaw?.dosha_modulation ? [ayurvedicPropsRaw.dosha_modulation] : ayurvedicPropsRaw?.dosha_karma ? [ayurvedicPropsRaw.dosha_karma] : []);
@@ -382,17 +390,17 @@ function ResultsContent() {
                 )}
 
                 {/* Ayurvedic Properties */}
-                {ayurvedicProps && (
+                {hasAyurvedicProps && (
                     <motion.div {...fadeUp} transition={{ delay: 0.15 }} className="result-card">
                         <div className="card-header">
                             <Leaf size={20} className="card-icon icon-green" />
                             <h2>{t('resAyurvedic')}</h2>
                         </div>
-                        {ayurvedicProps.rasa && <p className="card-detail"><strong>{t('resRasa')}:</strong> {ayurvedicProps.rasa}</p>}
-                        {ayurvedicProps.guna && <p className="card-detail"><strong>{t('resGuna')}:</strong> {ayurvedicProps.guna}</p>}
-                        {ayurvedicProps.virya && <p className="card-detail"><strong>{t('resVirya')}:</strong> {ayurvedicProps.virya}</p>}
-                        {ayurvedicProps.vipaka && <p className="card-detail"><strong>{t('resVipaka')}:</strong> {ayurvedicProps.vipaka}</p>}
-                        {ayurvedicProps.dosha_effect && <p className="card-detail"><strong>{t('resDoshaEffect')}:</strong> {ayurvedicProps.dosha_effect}</p>}
+                        {rasa && <p className="card-detail"><strong>{t('resRasa')}:</strong> {rasa}</p>}
+                        {guna && <p className="card-detail"><strong>{t('resGuna')}:</strong> {guna}</p>}
+                        {virya && <p className="card-detail"><strong>{t('resVirya')}:</strong> {virya}</p>}
+                        {vipaka && <p className="card-detail"><strong>{t('resVipaka')}:</strong> {vipaka}</p>}
+                        {dosha_effect && <p className="card-detail"><strong>{t('resDoshaEffect')}:</strong> {dosha_effect}</p>}
                     </motion.div>
                 )}
 
